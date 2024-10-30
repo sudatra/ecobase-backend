@@ -1,0 +1,187 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                 String   @id @default(uuid())
+  firstName          String
+  lastName           String
+  email              String   @unique
+  referrerId         String?
+  aadharNumber       String
+  panNumber          String
+  aadharImageLink    String
+  panImageLink       String
+  isMembershipActive Boolean
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  isActive           Boolean  @default(true)
+
+  referrer User? @relation("userReferrer", fields: [referrerId], references: [id])
+
+  referrers         User[]      @relation("userReferrer")
+  addresses         Address[]   @relation("userAddress")
+  slabs             SlabInfo[]  @relation("userSlab")
+  userHeirarchies   Hierarchy[] @relation("userHierarchy")
+  parentHierarchies Hierarchy[] @relation("parentHierarchy")
+  userWallet        Wallet?     @relation("userWallet")
+}
+
+model Address {
+  id        String   @id @default(uuid())
+  street    String
+  locality  String
+  city      String
+  district  String
+  pincode   String
+  state     String
+  country   String
+  userId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  isActive  Boolean  @default(true)
+
+  user User @relation("userAddress", fields: [userId], references: [id])
+
+  orderAddresses Order[] @relation("orderAddress")
+}
+
+model SlabInfo {
+  id              String   @default(uuid())
+  slabNumber      Int
+  level           Int
+  repurchaseLevel Int
+  userId          String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  isActive        Boolean  @default(true)
+
+  user User @relation("userSlab", fields: [userId], references: [id])
+
+  slabHierarchies Hierarchy[] @relation("slabHierarchy")
+
+  @@id([userId, slabNumber])
+}
+
+model Hierarchy {
+  id         String   @id @default(uuid())
+  userId     String
+  parentId   String
+  order      Int
+  slabNumber Int
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  isActive   Boolean  @default(true)
+
+  user   User     @relation("userHierarchy", fields: [userId], references: [id])
+  parent User     @relation("parentHierarchy", fields: [parentId], references: [id])
+  slab   SlabInfo @relation("slabHierarchy", fields: [userId, slabNumber], references: [userId, slabNumber])
+}
+
+model Product {
+  id              String   @id @default(uuid())
+  productName     String
+  productCategory Category
+  description     String
+  productMRP      Int
+  productDiscount Int
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  isActive        Boolean  @default(true)
+
+  products OrderLine[] @relation("product")
+}
+
+model Order {
+  id                String      @id @default(uuid())
+  userId            String
+  orderDate         DateTime
+  deliveryDate      DateTime
+  deliveryAddressId String
+  status            OrderStatus
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+  isActive          Boolean     @default(true)
+
+  address Address @relation("orderAddress", fields: [deliveryAddressId], references: [id])
+
+  orders            OrderLine[]   @relation("order")
+  transactionOrders Transaction[] @relation("transactionOrder")
+}
+
+model OrderLine {
+  id              String   @id @default(uuid())
+  orderId         String
+  productId       String
+  quantity        Int
+  productMRP      Int
+  productDiscount Int
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  isActive        Boolean  @default(true)
+
+  order   Order   @relation("order", fields: [orderId], references: [id])
+  product Product @relation("product", fields: [productId], references: [id])
+}
+
+model Transaction {
+  id            String        @id @default(uuid())
+  orderId       String
+  paymentDate   DateTime
+  paymentStatus PaymentStatus
+  paymentMode   PaymentMode
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  isActive      Boolean       @default(true)
+
+  order Order @relation("transactionOrder", fields: [orderId], references: [id])
+}
+
+model Wallet {
+  id               String   @id @default(uuid())
+  commissionAmount Int
+  repurchaseAmount Int
+  userId           String   @unique
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  isActive         Boolean  @default(true)
+
+  user User @relation("userWallet", fields: [userId], references: [id])
+}
+
+enum Category {
+  MISC
+  MEMBERSHIP
+}
+
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  RETURNED
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+enum PaymentMode {
+  CARD
+  UPI
+}
