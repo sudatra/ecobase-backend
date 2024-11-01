@@ -8,7 +8,6 @@ const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 function authenticateJWT(req, res, next) {
     var _a;
     const token = (_a = req.header('Authorization')) === null || _a === void 0 ? void 0 : _a.split(' ')[1];
-    console.log("Token from request:", token);
     if (!token) {
         return res.status(401).json({
             message: "Access Denied"
@@ -16,7 +15,6 @@ function authenticateJWT(req, res, next) {
     }
     jsonwebtoken_1.default.verify(token, process.env.JWT_SECRET, (error, decoded) => {
         if (error) {
-            console.log(error);
             return res.status(403).json({
                 message: "Invalid Token"
             });

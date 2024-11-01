@@ -1,7 +1,7 @@
 import express, { Request, Response } from 'express';
-import { registerUser, loginUser, loginWithGoogleOAUTH, googleOAUTHCallback } from '../controllers/authController';
+import { registerUser, loginUser, loginWithGoogleOAUTH, googleOAUTHCallback } from './auth.controller';
 import passport from 'passport';
-import { authenticateJWT } from '../middlewares/authenticateJWT';
+import { authenticateJWT } from '../common/middlewares/authenticateJWT';
 
 const router = express.Router();
 

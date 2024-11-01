@@ -1,10 +1,10 @@
 import { NextFunction, Request, Response } from "express";
-import { prisma } from "../../utils/db";
+import { prisma } from "../common/utils/db";
 import {
   generateHashedPassword,
   comparePasswords,
   generateToken,
-} from "../../utils/auth";
+} from "../common/utils/auth";
 import passport from "passport";
 
 export const registerUser = async (req:Request, res: Response): Promise<any> => {

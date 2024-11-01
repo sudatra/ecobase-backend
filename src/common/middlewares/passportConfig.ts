@@ -1,8 +1,8 @@
 import { Strategy as JWTStrategy, ExtractJwt } from "passport-jwt";
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import passport from "passport";
-import { prisma } from "../../utils/db";
-import { generateToken } from "../../utils/auth";
+import { prisma } from "../utils/db";
+import { generateToken } from "../utils/auth";
 
 const jwtOptions = {
     jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
