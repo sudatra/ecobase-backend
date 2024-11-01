@@ -1,23 +1,16 @@
-import { NextFunction, Request, RequestHandler, Response } from "express";
-import { prisma } from "../../common/utils/db";
-import {
-  generateHashedPassword,
-  comparePasswords,
-  generateToken,
-} from "../../common/utils/auth";
-import passport from "passport";
+import { Request, RequestHandler, Response } from "express";
 import { authService } from "./auth.service";
 import { handleServiceResponse } from "@/common/utils/http.handlers";
-
 
 class AuthController {
   public register: RequestHandler = async (req: Request, res: Response) => {
     const serviceResponse = await authService.registerUser(req.body);
     handleServiceResponse(serviceResponse, res);
   }
+
   public login: RequestHandler = async (req: Request, res: Response) => {
     const { email, password } = req.body;
-    const serviceResponse = await authService.loginUser(email, password);
+    const serviceResponse = await authService.loginUser({ email, password });
     handleServiceResponse(serviceResponse, res);
   }
 }
