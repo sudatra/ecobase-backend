@@ -7,17 +7,17 @@ export const connectToDatabase = async () => {
         await prisma.$connect();
         console.log("Database Connected");
     }
-    catch(error) {
+    catch (error) {
         throw error;
     }
 }
- 
+
 export const disconnectFromDatabase = async () => {
     try {
         await prisma.$disconnect();
         console.log("Database DisConnected");
     }
-    catch(error) {
+    catch (error) {
         console.error("Unable to disconnect from Database", error);
     }
 }
