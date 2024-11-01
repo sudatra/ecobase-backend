@@ -15,10 +15,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const db_1 = require("./utils/db");
 const dotenv_1 = __importDefault(require("dotenv"));
+const passportConfig_1 = __importDefault(require("./auth/middlewares/passportConfig"));
+const authRoutes_1 = __importDefault(require("./auth/routes/authRoutes"));
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 const PORT = process.env.PORT || 3001;
 app.use(express_1.default.json());
+app.use(passportConfig_1.default.initialize());
+app.use('/auth', authRoutes_1.default);
 process.on('SIGINT', () => __awaiter(void 0, void 0, void 0, function* () {
     yield (0, db_1.disconnectFromDatabase)();
     process.exit(0);

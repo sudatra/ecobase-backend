@@ -1,15 +1,13 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { prisma } from "../../utils/db";
 import {
   generateHashedPassword,
   comparePasswords,
   generateToken,
 } from "../../utils/auth";
+import passport from "passport";
 
-export const registerUser = async (
-  req:Request,
-  res: Response
-): Promise<any> => {
+export const registerUser = async (req:Request, res: Response): Promise<any> => {
   const { email, password } = req.body;
 
   try {
@@ -43,10 +41,7 @@ export const registerUser = async (
   }
 };
 
-export const loginUser = async (
-  req: Request,
-  res: Response
-): Promise<any> => {
+export const loginUser = async (req: Request, res: Response): Promise<any> => {
   const { email, password } = req.body;
 
   try {
@@ -54,11 +49,17 @@ export const loginUser = async (
       where: { email: email },
     });
 
-    if (!user || !comparePasswords(password, user.password)) {
-      return res.status(401).json({ error: "Invalid credentials" });
+    if (!user) {
+      return res.status(401).json({ error: "Invalid credentials - Email" });
+    }
+
+    const isPasswordValid = await comparePasswords(password, user.password);
+    if (!isPasswordValid) {
+        return res.status(401).json({ error: "Invalid credentials - Password" });
     }
 
     const token = generateToken(user);
+    console.log("login token generated: ", token)
     return res.json({ token: token });
   } catch (error) {
     return res.status(500).json({
@@ -66,3 +67,19 @@ export const loginUser = async (
     });
   }
 };
+
+export const loginWithGoogleOAUTH = (req: Request, res: Response, next: NextFunction) => {
+  passport.authenticate("google", {
+    scope: ["profile", "email"]
+  })(req, res, next);
+};
+
+export const googleOAUTHCallback = async (req: Request, res: Response): Promise<any> => {
+  try {
+    const user = req.user as { user: any, token: string };
+    return res.json({ user: user.user, token: user.token });
+  }
+  catch(error) {
+    return res.status(400).json({ error: "Google OAuth Login failed" });
+  }
+}

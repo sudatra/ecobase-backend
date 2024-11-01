@@ -15,16 +15,16 @@ datasource db {
 
 model User {
   id                 String   @id @default(uuid())
-  firstName          String
-  lastName           String
+  firstName          String?
+  lastName           String?
   email              String   @unique
-  password           String
+  password           String?
   referrerId         String?
-  aadharNumber       String
-  panNumber          String
-  aadharImageLink    String
-  panImageLink       String
-  isMembershipActive Boolean
+  aadharNumber       String?
+  panNumber          String?
+  aadharImageLink    String?
+  panImageLink       String?
+  isMembershipActive Boolean  @default(false)
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
   isActive           Boolean  @default(true)
