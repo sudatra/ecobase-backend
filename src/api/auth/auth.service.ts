@@ -68,6 +68,18 @@ class AuthService {
             return ServiceResponse.failure("Login failed", null, StatusCodes.INTERNAL_SERVER_ERROR);
         }
     }
+
+    async loginWithGoogle(user: any): Promise<ServiceResponse<any>> {
+        try {
+            const { user: userInfo, token } = user;
+            return ServiceResponse.success("Google login successful", { user: userInfo, token }, StatusCodes.ACCEPTED);
+        }
+        catch (error) {
+            const errorMessage = `Error during Google OAuth login: ${(error as Error).message}`;
+            logger.error(errorMessage);
+            return ServiceResponse.failure("Google OAuth Login failed", null, StatusCodes.INTERNAL_SERVER_ERROR);
+        }
+    }
 }
 
 export const authService = new AuthService();
