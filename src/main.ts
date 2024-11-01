@@ -2,7 +2,7 @@ import express from 'express';
 import { connectToDatabase, disconnectFromDatabase } from './common/utils/db';
 import dotenv from 'dotenv';
 import passport from './common/middlewares/passportConfig';
-import authRoutes from './auth/auth.route'
+import authRoutes from './api/auth/auth.route'
 
 dotenv.config();
 

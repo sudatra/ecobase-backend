@@ -1,10 +1,10 @@
 import { NextFunction, Request, RequestHandler, Response } from "express";
-import { prisma } from "../common/utils/db";
+import { prisma } from "../../common/utils/db";
 import {
   generateHashedPassword,
   comparePasswords,
   generateToken,
-} from "../common/utils/auth";
+} from "../../common/utils/auth";
 import passport from "passport";
 import { authService } from "./auth.service";
 import { handleServiceResponse } from "@/common/utils/http.handlers";
