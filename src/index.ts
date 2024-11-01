@@ -27,6 +27,7 @@ const bootstrap = async () => {
 }
 
 bootstrap().catch((error) => {
+    console.log(error)
     logger.error("Failed to start the server", error);
     process.exit();
 });

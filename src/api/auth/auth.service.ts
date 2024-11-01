@@ -5,6 +5,7 @@ import { prisma } from "@/common/utils/db";
 import { comparePasswords, generateHashedPassword, generateToken } from "@/common/utils/auth";
 import { RegisterDTO } from "./dto/register.dto";
 import { LoginDTO } from "./dto/login.dto";
+import { logger } from "@/server";
 
 
 class AuthService {
@@ -30,6 +31,8 @@ class AuthService {
 
             return ServiceResponse.success("User registered successfully!!", newUser, StatusCodes.CREATED)
         } catch (error) {
+            const errorMessage = `Error registering user: $${(error as Error).message}`;
+            logger.error(errorMessage);
             return ServiceResponse.failure(
                 "An error occurred while registering users.",
                 null,
@@ -59,7 +62,9 @@ class AuthService {
 
             const token = generateToken(user);
             return ServiceResponse.success("Logged In Successfully", { token: token }, StatusCodes.ACCEPTED)
-        } catch (error) {
+        } catch (ex) {
+            const errorMessage = `Error logging in user: $${(ex as Error).message}`;
+            logger.error(errorMessage);
             return ServiceResponse.failure("Login failed", null, StatusCodes.INTERNAL_SERVER_ERROR);
         }
     }
