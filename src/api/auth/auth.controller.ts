@@ -36,20 +36,3 @@ class AuthController {
 
 
 export const authController = new AuthController();
-
-
-// export const loginWithGoogleOAUTH = (req: Request, res: Response, next: NextFunction) => {
-//   passport.authenticate("google", {
-//     scope: ["profile", "email"]
-//   })(req, res, next);
-// };
-
-// export const googleOAUTHCallback = async (req: Request, res: Response): Promise<any> => {
-//   try {
-//     const user = req.user as { user: any, token: string };
-//     return res.json({ user: user.user, token: user.token });
-//   }
-//   catch (error) {
-//     return res.status(400).json({ error: "Google OAuth Login failed" });
-//   }
-// }
