@@ -9,7 +9,8 @@
     "prisma:migrate": "npx prisma migrate dev --schema=src/prisma/schema.prisma",
     "build": "tsc && tsc-alias",
     "start": "nodemon dist/index.js",
-    "start:dev": "tsc && tsc-alias && nodemon dist/index.js"
+    "build-and-start": "tsc && tsc-alias && nodemon dist/index.js",
+    "start:dev": "nodemon --watch 'src/**/*.ts' --exec 'tsc && tsc-alias && node dist/index.js'"
   },
   "keywords": [],
   "author": "",
