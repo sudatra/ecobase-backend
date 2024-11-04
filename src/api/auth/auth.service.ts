@@ -72,7 +72,7 @@ class AuthService {
     async loginWithGoogle(user: any): Promise<ServiceResponse<any>> {
         try {
             const { user: userInfo, token } = user;
-            return ServiceResponse.success("Google login successful", { user: userInfo, token }, StatusCodes.ACCEPTED);
+            return ServiceResponse.success("Google login successfull", { user: userInfo, token }, StatusCodes.ACCEPTED);
         }
         catch (error) {
             const errorMessage = `Error during Google OAuth login: ${(error as Error).message}`;
