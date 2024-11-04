@@ -44,10 +44,8 @@ passport.use(
                     where: { email: profile.emails?.[0].value }
                 });
 
-                let newUser: any;
-
                 if(!user) {
-                    newUser = await prisma.user.create({
+                    user = await prisma.user.create({
                         data: {
                             email: profile.emails?.[0].value as string,
                             firstName: profile.name?.givenName,
@@ -56,7 +54,7 @@ passport.use(
                     });
                 }
 
-                const token = generateToken(newUser);
+                const token = generateToken(user);
                 return done(null, { user, token });
             }
             catch(error) {
