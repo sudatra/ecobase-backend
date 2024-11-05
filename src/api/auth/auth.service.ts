@@ -66,6 +66,20 @@ class AuthService {
                     password: hashedPassword,
                 },
             });
+            
+            if(userReferrerId && userReferrerId !== null) {
+                const referrer = await prisma.user.findFirst({
+                    where: { id: userReferrerId }
+                });
+
+                if(referrer) {
+                    const updatedDirectJoinees = [...referrer.directJoinees, newUser.id];
+                    await prisma.user.update({
+                        where: { id: userReferrerId },
+                        data: { directJoinees: updatedDirectJoinees }
+                    })
+                }
+            }
 
             const hierarchy = await userService.addUserHierarchy(newUser, userReferrerId);
 

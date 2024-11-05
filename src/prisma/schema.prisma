@@ -24,6 +24,7 @@ model User {
   panNumber          String?
   aadharImageLink    String?
   panImageLink       String?
+  directJoinees      String[]
   isMembershipActive Boolean  @default(false)
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
