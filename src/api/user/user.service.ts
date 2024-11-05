@@ -71,7 +71,16 @@ class UserService {
             }
 
             const slot = availableSlot[0];
-            const heirarchyLevel = slot.level + 1;
+
+            const parentSlabInfo = await prisma.slabInfo.findFirst({
+                where: { userId: slot.userId }
+            })
+
+            if (!parentSlabInfo) {
+                return ServiceResponse.failure("Parent SlabInfo not found", null, StatusCodes.BAD_REQUEST);
+            }
+
+            const heirarchyLevel = parentSlabInfo.level + 1;
 
             await prisma.slabInfo.create({
                 data: {
