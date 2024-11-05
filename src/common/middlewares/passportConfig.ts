@@ -45,13 +45,13 @@ passport.use(
                 });
 
                 if(!user) {
-                    user = await prisma.user.create({
-                        data: {
-                            email: profile.emails?.[0].value as string,
-                            firstName: profile.name?.givenName,
-                            lastName: profile.name?.familyName
-                        }
-                    });
+                    const userObj = {
+                        email: profile.emails?.[0].value as string,
+                        firstName: profile.name?.givenName,
+                        lastName: profile.name?.familyName
+                    }
+
+                    return done(null, { userObj });
                 }
 
                 const token = generateToken(user);

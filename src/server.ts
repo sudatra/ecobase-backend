@@ -40,7 +40,7 @@ app.use(passport.session());
 app.use(requestLogger);
 
 // Routes
-app.use("/api/auth",authRouter);
+app.use("/api/auth", authRouter);
 
 app.use(errorHandler());
 

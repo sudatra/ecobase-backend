@@ -78,7 +78,8 @@ model SlabInfo {
 model Hierarchy {
   id         String   @id @default(uuid())
   userId     String
-  parentId   String
+  parentId   String?
+  siblings   String[]
   order      Int
   slabNumber Int
   createdAt  DateTime @default(now())
@@ -86,7 +87,7 @@ model Hierarchy {
   isActive   Boolean  @default(true)
 
   user   User     @relation("userHierarchy", fields: [userId], references: [id])
-  parent User     @relation("parentHierarchy", fields: [parentId], references: [id])
+  parent User?     @relation("parentHierarchy", fields: [parentId], references: [id])
   slab   SlabInfo @relation("slabHierarchy", fields: [userId, slabNumber], references: [userId, slabNumber])
 }
 

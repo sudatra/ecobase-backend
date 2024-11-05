@@ -6,11 +6,13 @@ import { comparePasswords, generateHashedPassword, generateToken } from "@/commo
 import { RegisterDTO } from "./dto/register.dto";
 import { LoginDTO } from "./dto/login.dto";
 import { logger } from "@/server";
+import { userService } from "../user/user.service";
 
 
 class AuthService {
     async registerUser(registerDTO: RegisterDTO): Promise<ServiceResponse<any>> {
         const { email, password } = registerDTO;
+
         try {
             const existingUser = await prisma.user.findUnique({
                 where: { email: email },
@@ -21,7 +23,43 @@ class AuthService {
             }
 
             const hashedPassword = await generateHashedPassword(password as string);
-            const newUser = await prisma.user.create({
+            const userReferrerId = registerDTO?.referrerId;
+            let newUser: any;
+
+            const existingHierarchy = await prisma.hierarchy.findFirst();
+
+            if(!existingHierarchy) {
+                newUser = await prisma.user.create({
+                    data: {
+                        ...registerDTO,
+                        email: email,
+                        password: hashedPassword,
+                    },
+                });
+
+                await prisma.slabInfo.create({
+                    data: {
+                        userId: newUser.id,
+                        slabNumber: 1,
+                        repurchaseLevel: 1,
+                        level: 1
+                    }
+                });
+                
+                await prisma.hierarchy.create({
+                    data: {
+                        userId: newUser.id,
+                        parentId: null,
+                        slabNumber: 1,
+                        siblings: [],
+                        order: 1
+                    }
+                });
+
+                return ServiceResponse.success("root User registered successfully and Heirarchy created!!", newUser, StatusCodes.CREATED)
+            }
+
+            newUser = await prisma.user.create({
                 data: {
                     ...registerDTO,
                     email: email,
@@ -29,8 +67,11 @@ class AuthService {
                 },
             });
 
-            return ServiceResponse.success("User registered successfully!!", newUser, StatusCodes.CREATED)
-        } catch (error) {
+            const hierarchy = await userService.addUserHierarchy(newUser, userReferrerId);
+
+            return ServiceResponse.success("User registered successfully and hierarchy created!!", newUser, StatusCodes.CREATED)
+        }
+        catch (error) {
             const errorMessage = `Error registering user: $${(error as Error).message}`;
             logger.error(errorMessage);
             return ServiceResponse.failure(
