@@ -3,18 +3,11 @@ import { ServiceResponse } from "@/common/models/service.response";
 import { prisma } from "@/common/utils/db";
 import { logger } from "@/server";
 import { UserAddressDTO } from "./dto/userAddress.dto";
-
-interface HierarchySlot {
-    id: string;
-    userId: string;
-    siblings: string[];
-    parentId: string;
-    level: number;
-    createdAt: Date;
-}
+import { HierarchySlot } from "@/common/types/hierarchy.types";
+import { User } from "@/common/types/user.types";
 
 class UserService {
-    async addUserHierarchy(user: any, userReferrerId?: string): Promise<ServiceResponse<any>> {
+    async addUserHierarchy(user: User, userReferrerId?: string): Promise<ServiceResponse<any>> {
         try {
             let hierarchyQuery: string = "";
             let availableSlot: HierarchySlot[];
