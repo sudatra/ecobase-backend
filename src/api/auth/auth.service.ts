@@ -1,5 +1,4 @@
 import { StatusCodes } from "http-status-codes";
-import { User } from "@prisma/client";
 import { ServiceResponse } from "@/common/models/service.response";
 import { prisma } from "@/common/utils/db";
 import { comparePasswords, generateHashedPassword, generateToken } from "@/common/utils/auth";
@@ -7,6 +6,7 @@ import { RegisterDTO } from "./dto/register.dto";
 import { LoginDTO } from "./dto/login.dto";
 import { logger } from "@/server";
 import { userService } from "../user/user.service";
+import { User } from "@/common/types/user.types";
 
 
 class AuthService {
@@ -24,7 +24,7 @@ class AuthService {
 
             const hashedPassword = await generateHashedPassword(password as string);
             const userReferrerId = registerDTO?.referrerId;
-            let newUser: any;
+            let newUser: User;
 
             const existingHierarchy = await prisma.hierarchy.findFirst();
 
@@ -66,9 +66,22 @@ class AuthService {
                     password: hashedPassword,
                 },
             });
+            
+            if(userReferrerId && userReferrerId !== null) {
+                const referrer = await prisma.user.findFirst({
+                    where: { id: userReferrerId }
+                });
+
+                if(referrer) {
+                    const updatedDirectJoinees = [...referrer.directJoinees, newUser.id];
+                    await prisma.user.update({
+                        where: { id: userReferrerId },
+                        data: { directJoinees: updatedDirectJoinees }
+                    })
+                }
+            }
 
             const hierarchy = await userService.addUserHierarchy(newUser, userReferrerId);
-
             return ServiceResponse.success("User registered successfully and hierarchy created!!", newUser, StatusCodes.CREATED)
         }
         catch (error) {
