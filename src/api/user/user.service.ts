@@ -80,14 +80,14 @@ class UserService {
                 return ServiceResponse.failure("Parent SlabInfo not found", null, StatusCodes.BAD_REQUEST);
             }
 
-            const heirarchyLevel = parentSlabInfo.level + 1;
+            const hierarchyLevel = parentSlabInfo.level + 1;
 
             await prisma.slabInfo.create({
                 data: {
                     userId: user.id,
                     slabNumber: 1,
-                    repurchaseLevel: 1,
-                    level: heirarchyLevel
+                    repurchaseLevel: hierarchyLevel,
+                    level: hierarchyLevel
                 }
             });
 
