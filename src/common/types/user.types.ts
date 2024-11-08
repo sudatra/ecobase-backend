@@ -14,3 +14,11 @@ export interface User {
   updatedAt: Date;
   isActive: boolean;
 }
+
+export interface userHierarchyTree {
+  id?: string;
+  userid?: string;
+  parentId?: string | null;
+  siblings?: string[];
+  slabNumber?: number;
+}

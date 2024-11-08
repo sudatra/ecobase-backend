@@ -4,7 +4,7 @@ import { prisma } from "@/common/utils/db";
 import { logger } from "@/server";
 import { UserAddressDTO } from "./dto/userAddress.dto";
 import { HierarchySlot } from "@/common/types/hierarchy.types";
-import { User } from "@/common/types/user.types";
+import { User, userHierarchyTree } from "@/common/types/user.types";
 
 class UserService {
     async fetchUserDetails(email: string): Promise<ServiceResponse<any>> {
@@ -43,7 +43,7 @@ class UserService {
 
     async fetchUserHierarchyTree(userId: string): Promise<ServiceResponse<any>> {
         try {
-            const userHierarchyTree = await prisma.$queryRaw`
+            const flatHierarchyTree: userHierarchyTree[] = await prisma.$queryRaw`
                 WITH RECURSIVE UserTree AS (
                     SELECT h."id", h."userId", h."parentId", h."siblings", h."slabNumber"
                     FROM "Hierarchy" AS h
@@ -59,6 +59,8 @@ class UserService {
                 SELECT * FROM UserTree
             `;
 
+            const userHierarchyTree = this.buildHierarchyTree(flatHierarchyTree, userId);
+
             return ServiceResponse.success("Successfully fetched User's Tree", userHierarchyTree, StatusCodes.ACCEPTED);
         }
         catch(error) {
@@ -71,6 +73,32 @@ class UserService {
                 StatusCodes.BAD_REQUEST
             )
         }
+    }
+
+    buildHierarchyTree(flatHierarchyTree: userHierarchyTree[], rootUserId: string): any {
+        const nodeMap: { [key: string]: any } = [];
+
+        flatHierarchyTree.forEach((node: any) => {
+            node.children = [];
+            nodeMap[node.userId] = node;
+        });
+
+        const tree: any = [];
+
+        flatHierarchyTree.forEach((node: any) => {
+            if(node.userId === rootUserId) {
+                tree.push(node);
+            }
+            else if(node.parentId) {
+                const parentNode = nodeMap[node.parentId];
+    
+                if(parentNode) {
+                    parentNode.children.push(node);
+                }
+            }
+        });
+
+        return tree;
     }
 
     async addUserHierarchy(user: User, userReferrerId?: string): Promise<ServiceResponse<any>> {
