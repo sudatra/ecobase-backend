@@ -7,6 +7,72 @@ import { HierarchySlot } from "@/common/types/hierarchy.types";
 import { User } from "@/common/types/user.types";
 
 class UserService {
+    async fetchUserDetails(email: string): Promise<ServiceResponse<any>> {
+        try {
+            const userDetails = await prisma.user.findUnique({
+                where: { email: email }
+            });
+
+            const userAddressDetails = await prisma.address.findFirst({
+                where: { userId: userDetails?.id }
+            });
+
+            const userTree = await this.fetchUserHierarchyTree(userDetails?.id as string);
+            
+            return ServiceResponse.success(
+                "Successfully fetched User's Details",
+                {
+                    user: userDetails,
+                    address: userAddressDetails ?? {},
+                    hierarchyTree: userTree.responseObject
+                },
+                StatusCodes.ACCEPTED
+            );
+        }
+        catch(error) {
+            const errorMessage = `Error fetching User's details: $${(error as Error).message}`;
+            logger.error(errorMessage);
+
+            return ServiceResponse.failure(
+                "Error Occurred while fetching user's details",
+                null,
+                StatusCodes.BAD_REQUEST
+            )
+        }
+    }
+
+    async fetchUserHierarchyTree(userId: string): Promise<ServiceResponse<any>> {
+        try {
+            const userHierarchyTree = await prisma.$queryRaw`
+                WITH RECURSIVE UserTree AS (
+                    SELECT h."id", h."userId", h."parentId", h."siblings", h."slabNumber"
+                    FROM "Hierarchy" AS h
+                    WHERE h."userId" = ${userId}
+
+                    UNION ALL
+
+                    SELECT child."id", child."userId", child."parentId", child."siblings", child."slabNumber"
+                    FROM "Hierarchy" AS child
+                    INNER JOIN UserTree AS parent ON child."parentId" = parent."userId"
+                )
+                
+                SELECT * FROM UserTree
+            `;
+
+            return ServiceResponse.success("Successfully fetched User's Tree", userHierarchyTree, StatusCodes.ACCEPTED);
+        }
+        catch(error) {
+            const errorMessage = `Error fetching User's Tree: $${(error as Error).message}`;
+            logger.error(errorMessage);
+
+            return ServiceResponse.failure(
+                "Error Occurred while fetching User's Subtree",
+                null,
+                StatusCodes.BAD_REQUEST
+            )
+        }
+    }
+
     async addUserHierarchy(user: User, userReferrerId?: string): Promise<ServiceResponse<any>> {
         try {
             let hierarchyQuery: string = "";

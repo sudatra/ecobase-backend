@@ -10,6 +10,7 @@ import { env } from "@/common/utils/env.config";
 import rateLimiter from '@/common/middlewares/rate.limiter';
 import passport from './common/middlewares/passportConfig'
 import session from "express-session";
+import { userRouter } from '@/api/user/user.route';
 
 const logger = pino({ name: "server start" });
 const app: Express = express();
@@ -41,6 +42,7 @@ app.use(requestLogger);
 
 // Routes
 app.use("/api/auth", authRouter);
+app.use("/api/auth", userRouter);
 
 app.use(errorHandler());
 
