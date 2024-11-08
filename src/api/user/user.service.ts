@@ -4,7 +4,7 @@ import { prisma } from "@/common/utils/db";
 import { logger } from "@/server";
 import { UserAddressDTO } from "./dto/userAddress.dto";
 import { HierarchySlot } from "@/common/types/hierarchy.types";
-import { User, userHierarchyTree } from "@/common/types/user.types";
+import { User, UserHierarchyTree } from "@/common/types/user.types";
 
 class UserService {
     async fetchUserDetails(email: string): Promise<ServiceResponse<any>> {
@@ -43,7 +43,7 @@ class UserService {
 
     async fetchUserHierarchyTree(userId: string): Promise<ServiceResponse<any>> {
         try {
-            const flatHierarchyTree: userHierarchyTree[] = await prisma.$queryRaw`
+            const flatHierarchyTree: UserHierarchyTree[] = await prisma.$queryRaw`
                 WITH RECURSIVE UserTree AS (
                     SELECT h."id", h."userId", h."parentId", h."siblings", h."slabNumber"
                     FROM "Hierarchy" AS h
@@ -75,7 +75,7 @@ class UserService {
         }
     }
 
-    buildHierarchyTree(flatHierarchyTree: userHierarchyTree[], rootUserId: string): any {
+    buildHierarchyTree(flatHierarchyTree: UserHierarchyTree[], rootUserId: string): any {
         const nodeMap: { [key: string]: any } = [];
 
         flatHierarchyTree.forEach((node: any) => {

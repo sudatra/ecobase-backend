@@ -15,7 +15,7 @@ export interface User {
   isActive: boolean;
 }
 
-export interface userHierarchyTree {
+export interface UserHierarchyTree {
   id?: string;
   userid?: string;
   parentId?: string | null;
