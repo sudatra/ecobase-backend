@@ -17,14 +17,27 @@ class UserService {
                 where: { userId: userDetails?.id }
             });
 
-            const userTree = await this.fetchUserHierarchyTree(userDetails?.id as string);
+            const userSiblings = userDetails && await prisma.hierarchy.findMany({
+                where: { parentId: userDetails?.id },
+                select: {
+                    userId: true,
+                    order: true,
+                    slabNumber: true,
+                    isActive: true
+                }
+            });
+
+            const userSiblingIds = userSiblings && userSiblings.map((sibling: any) => sibling.userId);
+            const userSiblingDetails = userSiblingIds && await Promise.all(userSiblingIds?.map((siblingId: string) => {
+                return prisma.user.findUnique({ where: { id: siblingId } });
+            }));
             
             return ServiceResponse.success(
                 "Successfully fetched User's Details",
                 {
                     user: userDetails,
                     address: userAddressDetails ?? {},
-                    hierarchyTree: userTree.responseObject
+                    userSiblingDetails: userSiblingDetails
                 },
                 StatusCodes.ACCEPTED
             );
@@ -41,6 +54,7 @@ class UserService {
         }
     }
 
+    // use if needed
     async fetchUserHierarchyTree(userId: string): Promise<ServiceResponse<any>> {
         try {
             const flatHierarchyTree: UserHierarchyTree[] = await prisma.$queryRaw`
