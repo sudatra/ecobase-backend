@@ -4,20 +4,20 @@ import { prisma } from "@/common/utils/db";
 import { logger } from "@/server";
 import { UserAddressDTO } from "./dto/userAddress.dto";
 import { HierarchySlot } from "@/common/types/hierarchy.types";
-import { User, UserHierarchyTree } from "@/common/types/user.types";
+import { User, UserAddress, UserHierarchyTree, UserSibling } from "@/common/types/user.types";
 
 class UserService {
     async fetchUserDetails(email: string): Promise<ServiceResponse<any>> {
         try {
-            const userDetails = await prisma.user.findUnique({
+            const userDetails: User | null = await prisma.user.findUnique({
                 where: { email: email }
             });
 
-            const userAddressDetails = await prisma.address.findFirst({
+            const userAddressDetails: UserAddress | null = await prisma.address.findFirst({
                 where: { userId: userDetails?.id }
             });
 
-            const userSiblings = userDetails && await prisma.hierarchy.findMany({
+            const userSiblings: UserSibling[] | null = userDetails && await prisma.hierarchy.findMany({
                 where: { parentId: userDetails?.id },
                 select: {
                     userId: true,
@@ -27,8 +27,8 @@ class UserService {
                 }
             });
 
-            const userSiblingIds = userSiblings && userSiblings.map((sibling: any) => sibling.userId);
-            const userSiblingDetails = userSiblingIds && await Promise.all(userSiblingIds?.map((siblingId: string) => {
+            const userSiblingIds = userSiblings && userSiblings.map((sibling: UserSibling) => sibling.userId);
+            const userSiblingDetails = userSiblingIds && await Promise.all(userSiblingIds?.map((siblingId?: string) => {
                 return prisma.user.findUnique({ where: { id: siblingId } });
             }));
             
