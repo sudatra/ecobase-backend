@@ -6,7 +6,7 @@ export function authenticateJWT(req: Request, res: Response, next: NextFunction)
 
     if(!token) {
         return res.status(401).json({
-            message: "Access Denied"
+            message: "User Unauthorized - Access Denied"
         });
     }
 
