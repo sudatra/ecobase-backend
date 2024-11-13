@@ -1,7 +1,7 @@
 import { StatusCodes } from "http-status-codes";
 import { ServiceResponse } from "@/common/models/service.response";
 import { prisma } from "@/common/utils/db";
-import { comparePasswords, generateHashedPassword, generateToken } from "@/common/utils/auth";
+import { comparePasswords, generateHashedPassword, generateAccessToken, generateRefreshToken } from "@/common/utils/auth";
 import { RegisterDTO } from "./dto/register.dto";
 import { LoginDTO } from "./dto/login.dto";
 import { logger } from "@/server";
@@ -114,8 +114,10 @@ class AuthService {
                 return ServiceResponse.failure("Invalid credentials - Password", null, StatusCodes.BAD_REQUEST);
             }
 
-            const token = generateToken(user);
-            return ServiceResponse.success("Logged In Successfully", { token: token }, StatusCodes.ACCEPTED)
+            const accessToken = generateAccessToken(user);
+            const refreshToken = generateRefreshToken(user);
+
+            return ServiceResponse.success("Logged In Successfully", { accessToken: accessToken, refreshToken: refreshToken }, StatusCodes.ACCEPTED)
         } catch (ex) {
             const errorMessage = `Error logging in user: $${(ex as Error).message}`;
             logger.error(errorMessage);

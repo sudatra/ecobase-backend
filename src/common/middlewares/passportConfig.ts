@@ -2,7 +2,7 @@ import { Strategy as JWTStrategy, ExtractJwt } from "passport-jwt";
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import passport from "passport";
 import { prisma } from "../utils/db";
-import { generateToken } from "../utils/auth";
+import { generateAccessToken, generateRefreshToken } from "../utils/auth";
 
 const jwtOptions = {
     jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -54,8 +54,10 @@ passport.use(
                     return done(null, { userObj });
                 }
 
-                const token = generateToken(user);
-                return done(null, { user, token });
+                const accessToken = generateAccessToken(user);
+                const refreshToken = generateRefreshToken(user);
+
+                return done(null, { user, accessToken, refreshToken });
             }
             catch(error) {
                 return done(error, null as any)
